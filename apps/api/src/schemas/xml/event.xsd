@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <!-- Pulse & Pass Complete Event Manifest XML Schema Definition (XSD) -->
+  <xs:element name="event">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="title">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:minLength value="3"/>
+              <xs:maxLength value="255"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:element>
+
+        <xs:element name="slug">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:pattern value="[a-z0-9\-]+"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:element>
+
+        <xs:element name="description" type="xs:string"/>
+        <xs:element name="category" type="xs:string"/>
+
+        <xs:element name="venue">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="name" type="xs:string"/>
+              <xs:element name="address" type="xs:string"/>
+              <xs:element name="city" type="xs:string"/>
+              <xs:element name="state" type="xs:string"/>
+              <xs:element name="postal_code" type="xs:string"/>
+              <xs:element name="capacity" type="xs:positiveInteger"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <xs:element name="tiers">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="tier" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="name" type="xs:string"/>
+                    <xs:element name="description" type="xs:string" minOccurs="0"/>
+                    <xs:element name="price_paise" type="xs:nonNegativeInteger"/>
+                    <xs:element name="capacity" type="xs:positiveInteger"/>
+                    <xs:element name="sales_start" type="xs:string" minOccurs="0"/>
+                    <xs:element name="sales_end" type="xs:string" minOccurs="0"/>
+                  </xs:sequence>
+                  <xs:attribute name="currency" type="xs:string" default="INR"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute name="version" type="xs:string" default="1.0"/>
+      <xs:attribute name="status" type="xs:string" default="published"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

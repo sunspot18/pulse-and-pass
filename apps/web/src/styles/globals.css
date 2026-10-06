@@ -1,0 +1,714 @@
+/* ==========================================================================
+   PULSE & PASS — BOX OFFICE DESIGN SYSTEM
+   Strict Type Hierarchy • Color Discipline • Physical Ticket Geometry
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. DESIGN TOKENS
+   -------------------------------------------------------------------------- */
+:root {
+  /* Strict 2-Surface Color Discipline */
+  --color-ink: #0F1012;             /* Page background (deep matte carbon) */
+  --color-surface: #17181B;         /* Ticket & card surface (one step lighter, no 3rd surface) */
+
+  /* Text & Border Values */
+  --color-paper: #F4F1EA;           /* Crisp ticket paper off-white */
+  --color-paper-80: rgba(244, 241, 234, 0.8); /* Standard body copy at 80% opacity */
+  --color-paper-muted: #8E929B;     /* Secondary metadata & labels */
+  --color-paper-dim: #555A64;       /* Low priority serials */
+  --color-border: rgba(244, 241, 234, 0.2); /* Default 2px border (20% paper opacity) */
+  --color-border-subtle: rgba(244, 241, 234, 0.1);
+
+  /* Functional Accents - Strict Role Discipline */
+  --color-cyan: #00F0FF;            /* Primary action buttons & focus rings ONLY */
+  --color-cyan-glow: rgba(0, 240, 255, 0.15);
+  --color-amber: #FFB800;           /* Tier / price highlights & "on sale" state ONLY */
+  --color-amber-glow: rgba(255, 184, 0, 0.15);
+  --color-void: #FF3838;            /* Error / VOID / Cancelled status ONLY */
+  --color-void-glow: rgba(255, 56, 56, 0.15);
+
+  /* Typography Stacks */
+  --font-display-stack: var(--font-display), 'Arial Black', sans-serif; /* Wide face: h1 and logo ONLY */
+  --font-sans-stack: var(--font-sans), system-ui, -apple-system, sans-serif; /* Normal-width bold grotesk: h2/h3 and body */
+  --font-mono-stack: var(--font-mono), 'Consolas', monospace; /* JetBrains Mono: metadata ONLY */
+
+  /* Strict Spacing Scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 48px;
+  --space-7: 64px;
+  --space-8: 96px;
+
+  /* Hard Offset Shadow - Strict 0 Blur */
+  --shadow-hard: 6px 6px 0px #000000;
+  --shadow-hard-sm: 4px 4px 0px #000000;
+
+  /* Physical Ticket Geometry */
+  --notch-size: 14px;
+  --transition-tactile: 120ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* --------------------------------------------------------------------------
+   2. CSS RESET & GLOBAL BASICS
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  background-color: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-sans-stack);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-sans-stack);
+  line-height: 1.6;
+  overflow-x: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hide or reposition Next.js dev indicator overlap */
+nextjs-portal,
+[data-nextjs-toast],
+.nextjs-toast-errors-parent {
+  display: none !important;
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(1rem, 3.5vw, 2.5rem);
+  padding-right: clamp(1rem, 3.5vw, 2.5rem);
+}
+
+/* Skip Link */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: var(--space-3);
+  background: var(--color-cyan);
+  color: var(--color-ink);
+  font-family: var(--font-mono-stack);
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-ink);
+  box-shadow: var(--shadow-hard-sm);
+  z-index: 9999;
+  text-decoration: none;
+  transition: top var(--transition-tactile);
+}
+
+.skip-link:focus {
+  top: var(--space-3);
+  outline: 2px solid var(--color-cyan);
+}
+
+/* --------------------------------------------------------------------------
+   3. TYPE HIERARCHY (Strict Scale: 12 / 14 / 16 / 20 / 28 / 44 / 72)
+   -------------------------------------------------------------------------- */
+
+/* H1: Display wide face ONLY. Max 72px, clamps cleanly, never wraps to 3 lines */
+h1,
+.type-h1 {
+  font-family: var(--font-display-stack);
+  font-size: clamp(1.75rem, 5vw, 4.5rem); /* 28px to 72px */
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: var(--color-paper);
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* H2: Normal-width bold grotesk. 44px (2.75rem) */
+h2,
+.type-h2 {
+  font-family: var(--font-sans-stack);
+  font-size: clamp(1.75rem, 3.5vw, 2.75rem); /* 28px to 44px */
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-paper);
+}
+
+/* H3: Normal-width bold grotesk. 28px (1.75rem) */
+h3,
+.type-h3 {
+  font-family: var(--font-sans-stack);
+  font-size: 1.75rem; /* 28px */
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--color-paper);
+}
+
+/* H4: Normal-width bold grotesk. 20px (1.25rem) */
+h4,
+.type-h4 {
+  font-family: var(--font-sans-stack);
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.35;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-paper);
+}
+
+/* Body Copy: Space Grotesk, 16-18px, sentence case, max-width 65ch, 80% opacity */
+p,
+.type-body {
+  font-family: var(--font-sans-stack);
+  font-size: 1rem; /* 16px */
+  line-height: 1.6;
+  font-weight: 400;
+  color: var(--color-paper-80);
+  max-width: 65ch;
+}
+
+.type-body-lg {
+  font-family: var(--font-sans-stack);
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.6;
+  font-weight: 400;
+  color: var(--color-paper-80);
+  max-width: 65ch;
+}
+
+/* Metadata Text: JetBrains Mono ONLY, 12-14px, uppercase, 0.08em max letter-spacing */
+.meta-text,
+.meta-label {
+  font-family: var(--font-mono-stack);
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.4;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-paper-muted);
+}
+
+.meta-text-sm {
+  font-family: var(--font-mono-stack);
+  font-size: 0.75rem; /* 12px */
+  line-height: 1.3;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-paper-muted);
+}
+
+/* Numeric / Price Displays: Mono, Amber for on-sale highlight */
+.price-tag {
+  font-family: var(--font-mono-stack);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-amber);
+}
+
+.price-tag-lg {
+  font-family: var(--font-mono-stack);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-amber);
+}
+
+/* --------------------------------------------------------------------------
+   4. BUTTONS & INTERACTIVE ELEMENTS
+   -------------------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono-stack);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.75rem 1.5rem;
+  min-height: 48px;
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: 0;
+  transition: transform var(--transition-tactile), box-shadow var(--transition-tactile);
+  border: 2px solid transparent;
+}
+
+/* Primary Action: Cyan ONLY */
+.btn-cyan {
+  background-color: var(--color-cyan);
+  color: var(--color-ink);
+  border-color: var(--color-cyan);
+  box-shadow: var(--shadow-hard-sm);
+}
+
+.btn-cyan:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000000;
+}
+
+.btn-cyan:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #000000;
+}
+
+.btn-cyan:focus-visible {
+  outline: 2px solid var(--color-cyan);
+  outline-offset: 4px;
+}
+
+/* Secondary Button: Default 2px Paper at 20% opacity */
+.btn-secondary {
+  background-color: var(--color-surface);
+  color: var(--color-paper);
+  border: 2px solid var(--color-border);
+  box-shadow: var(--shadow-hard-sm);
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-paper);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000000;
+}
+
+.btn-secondary:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #000000;
+}
+
+.btn-secondary:focus-visible {
+  outline: 2px solid var(--color-cyan);
+  outline-offset: 4px;
+}
+
+/* Ghost Button */
+.btn-ghost {
+  background: transparent;
+  color: var(--color-paper);
+  border: 2px solid var(--color-border);
+}
+
+.btn-ghost:hover {
+  border-color: var(--color-paper);
+  background: rgba(244, 241, 234, 0.05);
+}
+
+.btn-ghost:focus-visible {
+  outline: 2px solid var(--color-cyan);
+  outline-offset: 4px;
+}
+
+/* Small Button Variant */
+.btn-sm {
+  min-height: 38px;
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+}
+
+/* --------------------------------------------------------------------------
+   5. TICKET COMPONENT (Edge-Notched Semicircles & Hard Offset Shadow)
+   -------------------------------------------------------------------------- */
+
+/* Outer wrapper carries the 6px hard shadow that contours around the notches */
+.ticket-wrapper {
+  position: relative;
+  width: 100%;
+  filter: drop-shadow(var(--shadow-hard));
+}
+
+/* Ticket Slab: Surface #17181B, 2px border at 20% paper opacity */
+.ticket-row {
+  width: 100%;
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-border);
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  position: relative;
+  overflow: visible;
+  text-decoration: none;
+  color: inherit;
+  transition: transform var(--transition-tactile);
+}
+
+.ticket-wrapper:hover .ticket-row {
+  border-color: rgba(244, 241, 234, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Desktop Horizontal Ticket with Right-Side Stub */
+.ticket-body {
+  flex: 1;
+  padding: clamp(1.25rem, 2.5vw, 2rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0; /* Prevents text overflow */
+}
+
+/* Perforation Divider (vertical line on desktop) */
+.ticket-perforation-v {
+  position: relative;
+  width: 0px;
+  border-left: 2px dashed rgba(244, 241, 234, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Semicircle notches cut ON THE TOP AND BOTTOM EDGES at the perforation line */
+.ticket-perforation-v::before,
+.ticket-perforation-v::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background-color: var(--color-ink);
+  border-radius: 50%;
+  z-index: 5;
+}
+
+.ticket-perforation-v::before {
+  top: -14px;
+  left: -12px;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.ticket-perforation-v::after {
+  bottom: -14px;
+  left: -12px;
+  border-top: 2px solid var(--color-border);
+}
+
+/* Ticket Stub Right */
+.ticket-stub {
+  width: 220px;
+  flex-shrink: 0;
+  padding: 1.5rem 1.25rem;
+  background-color: rgba(15, 16, 18, 0.4);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+/* Horizontal Perforation (for mobile or stacked ticket cards) */
+.ticket-perforation-h {
+  position: relative;
+  width: 100%;
+  height: 0px;
+  border-top: 2px dashed rgba(244, 241, 234, 0.25);
+  margin: 1rem 0;
+}
+
+/* Semicircles cut ON LEFT AND RIGHT EDGES */
+.ticket-perforation-h::before,
+.ticket-perforation-h::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background-color: var(--color-ink);
+  border-radius: 50%;
+  z-index: 5;
+  top: -12px;
+}
+
+.ticket-perforation-h::before {
+  left: -14px;
+  border-right: 2px solid var(--color-border);
+}
+
+.ticket-perforation-h::after {
+  right: -14px;
+  border-left: 2px solid var(--color-border);
+}
+
+/* Masked Edge Notches Variant (uses CSS mask-image radial-gradient) */
+.ticket-notched-edges {
+  -webkit-mask-image:
+    radial-gradient(circle 12px at 0% 50%, transparent 12px, #000 12.5px),
+    radial-gradient(circle 12px at 100% 50%, transparent 12px, #000 12.5px);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    radial-gradient(circle 12px at 0% 50%, transparent 12px, #000 12.5px),
+    radial-gradient(circle 12px at 100% 50%, transparent 12px, #000 12.5px);
+  mask-composite: intersect;
+}
+
+/* --------------------------------------------------------------------------
+   6. STAMPS & BADGES (Rotated -3deg, Max one per ticket)
+   -------------------------------------------------------------------------- */
+.stamp {
+  display: inline-block;
+  font-family: var(--font-mono-stack);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.35rem 0.75rem;
+  border-width: 2px;
+  border-style: solid;
+  transform: rotate(-3deg);
+  white-space: nowrap;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ON SALE: Amber ONLY */
+.stamp-onsale {
+  color: var(--color-amber);
+  border-color: var(--color-amber);
+  background-color: rgba(255, 184, 0, 0.08);
+}
+
+/* ADMITTED / GATE OPEN: Cyan ONLY */
+.stamp-admitted {
+  color: var(--color-cyan);
+  border-color: var(--color-cyan);
+  background-color: rgba(0, 240, 255, 0.08);
+}
+
+/* SOLD OUT / VOID: Red ONLY */
+.stamp-void {
+  color: var(--color-void);
+  border-color: var(--color-void);
+  background-color: rgba(255, 56, 56, 0.08);
+}
+
+/* Headliner Stamp: Amber */
+.stamp-headliner {
+  color: var(--color-amber);
+  border-color: var(--color-amber);
+  background-color: rgba(255, 184, 0, 0.12);
+  font-size: 0.875rem;
+  padding: 0.45rem 0.9rem;
+}
+
+/* Subtle Meta Badge (No rotation) */
+.badge-pill {
+  font-family: var(--font-mono-stack);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.25rem 0.6rem;
+  background-color: rgba(244, 241, 234, 0.08);
+  border: 1px solid var(--color-border);
+  color: var(--color-paper-muted);
+}
+
+/* --------------------------------------------------------------------------
+   7. FORM INPUTS & SEARCH CONTROLS
+   -------------------------------------------------------------------------- */
+.input-box {
+  width: 100%;
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-border);
+  color: var(--color-paper);
+  font-family: var(--font-sans-stack);
+  font-size: 0.95rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0;
+  outline: none;
+  transition: border-color var(--transition-tactile);
+}
+
+.input-box:focus {
+  border-color: var(--color-cyan);
+  outline: 2px solid var(--color-cyan);
+  outline-offset: -2px;
+}
+
+.input-box::placeholder {
+  color: var(--color-paper-dim);
+}
+
+/* --------------------------------------------------------------------------
+   8. RESPONSIVE BREAKPOINTS (Mobile Stacking)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .ticket-row {
+    flex-direction: column;
+  }
+
+  .ticket-perforation-v {
+    width: 100%;
+    height: 0px;
+    border-left: none;
+    border-top: 2px dashed rgba(244, 241, 234, 0.25);
+  }
+
+  .ticket-perforation-v::before,
+  .ticket-perforation-v::after {
+    top: -12px;
+  }
+
+  .ticket-perforation-v::before {
+    left: -14px;
+    border-right: 2px solid var(--color-border);
+    border-bottom: none;
+  }
+
+  .ticket-perforation-v::after {
+    left: auto;
+    right: -14px;
+    border-left: 2px solid var(--color-border);
+    border-top: none;
+  }
+
+  .ticket-stub {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+  }
+}
+
+/* Styleguide Responsive Grid */
+.styleguide-grid {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 3rem;
+  align-items: start;
+}
+
+.styleguide-sidebar {
+  position: sticky;
+  top: 84px;
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-border);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-hard-sm);
+}
+
+@media (max-width: 860px) {
+  .styleguide-grid {
+    grid-template-columns: 100%;
+    gap: 2rem;
+  }
+
+  .styleguide-sidebar {
+    position: relative;
+    top: 0;
+  }
+}
+
+/* Navbar Responsive Architecture */
+.navbar-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 64px;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  gap: 1.5rem;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display-stack);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-paper);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+@media (min-width: 641px) {
+  .navbar-top-row {
+    display: contents;
+  }
+
+  .navbar-brand {
+    order: 1;
+  }
+
+  .navbar-nav {
+    order: 2;
+  }
+
+  .navbar-actions {
+    order: 3;
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar-inner {
+    flex-direction: column;
+    align-items: stretch;
+    min-height: auto;
+    padding-top: 0.75rem;
+    padding-bottom: 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .navbar-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .navbar-brand {
+    font-size: 1.05rem;
+  }
+
+  .navbar-nav {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 0.4rem;
+    border-top: 1px solid rgba(244, 241, 234, 0.12);
+    gap: 0.5rem;
+  }
+
+  .navbar-nav a {
+    font-size: 0.75rem;
+  }
+}
+
+
+

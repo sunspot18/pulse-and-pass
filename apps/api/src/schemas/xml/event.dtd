@@ -1,0 +1,33 @@
+<!--
+  Pulse & Pass Event Manifest Document Type Definition (DTD)
+  Defines structural grammar for event manifest exchange and imports.
+-->
+
+<!ELEMENT event (title, slug, description, category, venue, tiers)>
+<!ATTLIST event
+  version CDATA #IMPLIED
+  status (draft|published|cancelled|completed) "published"
+>
+
+<!ELEMENT title (#PCDATA)>
+<!ELEMENT slug (#PCDATA)>
+<!ELEMENT description (#PCDATA)>
+<!ELEMENT category (#PCDATA)>
+
+<!ELEMENT venue (name, address, city, state, postal_code, capacity)>
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT address (#PCDATA)>
+<!ELEMENT city (#PCDATA)>
+<!ELEMENT state (#PCDATA)>
+<!ELEMENT postal_code (#PCDATA)>
+<!ELEMENT capacity (#PCDATA)>
+
+<!ELEMENT tiers (tier+)>
+<!ELEMENT tier (name, description?, price_paise, capacity, sales_start?, sales_end?)>
+<!ATTLIST tier
+  currency CDATA "INR"
+>
+
+<!ELEMENT price_paise (#PCDATA)>
+<!ELEMENT sales_start (#PCDATA)>
+<!ELEMENT sales_end (#PCDATA)>
