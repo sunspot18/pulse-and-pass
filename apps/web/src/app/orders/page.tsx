@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '../../components/Navbar';
 import { Footer } from '../../components/Footer';
+import { apiRequest, API_BASE_URL } from '../../lib/api';
+import { useToast } from '../../components/Toast';
 
 interface WalletTicket {
   id: string;
@@ -22,6 +24,7 @@ interface WalletTicket {
   monthYear: string;
   gateTime: string;
   orderNumber: string;
+  qrCodeDataUrl?: string;
 }
 
 const SEEDED_WALLET_TICKETS: WalletTicket[] = [
@@ -61,16 +64,41 @@ const SEEDED_WALLET_TICKETS: WalletTicket[] = [
   },
 ];
 
+interface ApiTicketItem {
+  id: string;
+  ticket_code: string;
+  status: 'valid' | 'used' | 'cancelled' | 'refunded';
+  tier_name?: string;
+  unit_price_paise?: number;
+  attendee_name?: string;
+  attendee_email?: string;
+  event_title?: string;
+  venue_name?: string;
+  venue_city?: string;
+  event_start_time?: string;
+  doors_open_time?: string;
+  order_id?: string;
+  qr_code_data_url?: string;
+}
+
 export default function OrdersPage() {
   const router = useRouter();
+  const { showToast } = useToast();
+
   const [tickets, setTickets] = useState<WalletTicket[]>(SEEDED_WALLET_TICKETS);
-  const [currentUser, setCurrentUser] = useState<{ name: string; email: string } | null>(null);
+  const [currentUser, setCurrentUser] = useState<{
+    name: string;
+    email: string;
+    role?: string;
+  } | null>(null);
   const [activeTab, setActiveTab] = useState<'passes' | 'orders'>('passes');
+  const [authToken, setAuthToken] = useState<string>('');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedUser = localStorage.getItem('user');
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token') || '';
+      setAuthToken(token);
 
       if (storedUser) {
         try {
@@ -79,27 +107,61 @@ export default function OrdersPage() {
           setCurrentUser({ name: 'Rishika Deshmukh', email: 'rishika@pulsepass.dev' });
         }
       } else {
-        // Default to attendee view for seamless demo
         setCurrentUser({ name: 'Rishika Deshmukh', email: 'rishika@pulsepass.dev' });
       }
 
-      // Try fetching live wallet from backend if token exists
+      // Fetch live wallet from backend if token exists
       if (token) {
-        fetch('http://localhost:4000/api/v1/tickets/wallet', {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-          .then((res) => (res.ok ? res.json() : null))
+        apiRequest<{ active: ApiTicketItem[]; past: ApiTicketItem[]; total: number }>(
+          '/tickets/wallet',
+        )
           .then((data) => {
-            if (data?.data && Array.isArray(data.data) && data.data.length > 0) {
-              setTickets(data.data);
+            const allTickets = [...(data.active || []), ...(data.past || [])];
+            if (allTickets.length > 0) {
+              const mapped: WalletTicket[] = allTickets.map((t: ApiTicketItem) => {
+                const eventDateObj = new Date(t.event_start_time || Date.now());
+                return {
+                  id: t.id,
+                  ticketCode: t.ticket_code,
+                  status: t.status,
+                  tierName: t.tier_name || 'General Admission',
+                  pricePaise: t.unit_price_paise || 99900,
+                  attendeeName: t.attendee_name || 'Pass Holder',
+                  attendeeEmail: t.attendee_email || 'attendee@pulsepass.dev',
+                  eventTitle: t.event_title || 'Pulse & Pass Event',
+                  venueName: t.venue_name || 'HITEX Exhibition Centre',
+                  venueCity: t.venue_city || 'Hyderabad',
+                  eventDate: eventDateObj.toLocaleDateString('en-IN', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  }),
+                  dayNumber: eventDateObj.getDate().toString().padStart(2, '0'),
+                  monthYear: eventDateObj
+                    .toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+                    .toUpperCase(),
+                  gateTime: t.doors_open_time
+                    ? new Date(t.doors_open_time).toLocaleTimeString('en-IN', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                      }) + ' IST'
+                    : '18:00 IST',
+                  orderNumber: `ORD-${t.order_id?.slice(0, 8) || '2026-001'}`,
+                  qrCodeDataUrl: t.qr_code_data_url,
+                };
+              });
+              setTickets(mapped);
             }
           })
-          .catch(() => {
-            // Keep seeded fallback tickets
+          .catch((err) => {
+            // Keep seeded fallback tickets and notify user
+            showToast(`Using offline wallet cache: ${err.message}`, 'info');
           });
       }
     }
-  }, []);
+  }, [showToast]);
 
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
@@ -108,6 +170,7 @@ export default function OrdersPage() {
       document.cookie = 'pulsepass_token=; path=/; max-age=0;';
     }
     setCurrentUser(null);
+    showToast('Signed out of wallet session', 'info');
     router.push('/');
   };
 
@@ -117,7 +180,6 @@ export default function OrdersPage() {
 
       <main style={{ minHeight: 'calc(100vh - 160px)', padding: '2.5rem 0 4rem' }}>
         <div className="container">
-          
           {/* Header Bar */}
           <div
             style={{
@@ -132,26 +194,63 @@ export default function OrdersPage() {
             }}
           >
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-                <span className="badge-pill" style={{ color: 'var(--color-cyan)', borderColor: 'var(--color-cyan)' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  marginBottom: '0.5rem',
+                }}
+              >
+                <span
+                  className="badge-pill"
+                  style={{ color: 'var(--color-cyan)', borderColor: 'var(--color-cyan)' }}
+                >
                   ACTIVE PASS WALLET
                 </span>
                 <span className="meta-text-sm" style={{ color: 'var(--color-paper-muted)' }}>
                   {currentUser?.email || 'rishika@pulsepass.dev'}
                 </span>
               </div>
-              <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3.25rem)' }}>
-                My Tickets &amp; Passes
-              </h1>
+              <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3.25rem)' }}>My Tickets &amp; Passes</h1>
               <p className="body-copy" style={{ marginTop: '0.5rem', fontSize: '1rem' }}>
-                Signed in as <strong style={{ color: 'var(--color-paper)' }}>{currentUser?.name || 'Rishika Deshmukh'}</strong>. Present your QR code or printable pass manifest at the venue gates for instant scan.
+                Signed in as{' '}
+                <strong style={{ color: 'var(--color-paper)' }}>
+                  {currentUser?.name || 'Rishika Deshmukh'}
+                </strong>
+                . Present your QR code or printable pass manifest at the venue gates for instant
+                scan.
               </p>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-              <Link href="/#lineup" className="btn btn-secondary btn-sm">
+            <div
+              style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}
+            >
+              <Link
+                href="/events"
+                className="btn btn-secondary btn-sm"
+                style={{ textDecoration: 'none' }}
+              >
                 + DISCOVER MORE SHOWS
               </Link>
+              {currentUser?.role === 'organizer' && (
+                <Link
+                  href="/organizer"
+                  className="btn btn-cyan btn-sm"
+                  style={{ textDecoration: 'none' }}
+                >
+                  ORGANIZER CONSOLE
+                </Link>
+              )}
+              {currentUser?.role === 'admin' && (
+                <Link
+                  href="/admin"
+                  className="btn btn-cyan btn-sm"
+                  style={{ textDecoration: 'none' }}
+                >
+                  ADMIN PANEL
+                </Link>
+              )}
               <button
                 type="button"
                 onClick={handleLogout}
@@ -192,145 +291,176 @@ export default function OrdersPage() {
           {/* Tab 1: Active Passes */}
           {activeTab === 'passes' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-              {tickets.map((t) => (
-                <div key={t.id} className="ticket-wrapper">
-                  <div className="ticket-row" style={{ minHeight: '220px' }}>
-                    
-                    {/* Main Ticket Body */}
-                    <div className="ticket-body">
-                      <div>
-                        {/* Meta Top Line */}
+              {tickets.map((t) => {
+                const printUrl = `${API_BASE_URL}/tickets/${t.id}/print${authToken ? `?token=${authToken}` : ''}`;
+
+                return (
+                  <div key={t.id} className="ticket-wrapper">
+                    <div className="ticket-row" style={{ minHeight: '220px' }}>
+                      {/* Main Ticket Body */}
+                      <div className="ticket-body">
+                        <div>
+                          {/* Meta Top Line */}
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              flexWrap: 'wrap',
+                              gap: '0.75rem',
+                              marginBottom: '0.75rem',
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                              <span
+                                className="badge-pill"
+                                style={{
+                                  color: 'var(--color-amber)',
+                                  borderColor: 'var(--color-amber)',
+                                }}
+                              >
+                                {t.tierName.toUpperCase()}
+                              </span>
+                              <span className="meta-text-sm">GATE ENTRY: {t.gateTime}</span>
+                            </div>
+
+                            <div className="stamp stamp-onsale" style={{ position: 'static' }}>
+                              {t.status.toUpperCase()}
+                            </div>
+                          </div>
+
+                          {/* Title */}
+                          <h2
+                            style={{
+                              fontSize: 'clamp(1.4rem, 2.5vw, 1.85rem)',
+                              marginBottom: '0.5rem',
+                            }}
+                          >
+                            {t.eventTitle}
+                          </h2>
+
+                          <p className="meta-text" style={{ color: 'var(--color-paper-muted)' }}>
+                            {t.venueName} • {t.venueCity}
+                          </p>
+                        </div>
+
+                        {/* Attendee Details & Actions */}
                         <div
                           style={{
+                            borderTop: '1px solid rgba(244, 241, 234, 0.1)',
+                            paddingTop: '1rem',
+                            marginTop: '1rem',
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
                             flexWrap: 'wrap',
-                            gap: '0.75rem',
-                            marginBottom: '0.75rem',
+                            gap: '1rem',
                           }}
                         >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <span className="badge-pill" style={{ color: 'var(--color-amber)', borderColor: 'var(--color-amber)' }}>
-                              {t.tierName.toUpperCase()}
-                            </span>
-                            <span className="meta-text-sm">GATE ENTRY: {t.gateTime}</span>
+                          <div>
+                            <div
+                              className="meta-text-sm"
+                              style={{ color: 'var(--color-paper-muted)' }}
+                            >
+                              PASS HOLDER
+                            </div>
+                            <div
+                              style={{
+                                fontFamily: 'var(--font-sans-stack)',
+                                fontWeight: 600,
+                                fontSize: '1rem',
+                              }}
+                            >
+                              {t.attendeeName}
+                            </div>
                           </div>
 
-                          <div className="stamp stamp-sale" style={{ position: 'static' }}>
-                            CONFIRMED
+                          <div>
+                            <div
+                              className="meta-text-sm"
+                              style={{ color: 'var(--color-paper-muted)' }}
+                            >
+                              ORDER REF
+                            </div>
+                            <div className="meta-text" style={{ color: 'var(--color-paper)' }}>
+                              {t.orderNumber}
+                            </div>
+                          </div>
+
+                          <div>
+                            <a
+                              href={printUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="btn btn-secondary btn-sm"
+                              style={{ textDecoration: 'none' }}
+                            >
+                              📄 PRINT PASS (XML)
+                            </a>
                           </div>
                         </div>
-
-                        {/* Title */}
-                        <h2 style={{ fontSize: 'clamp(1.4rem, 2.5vw, 1.85rem)', marginBottom: '0.5rem' }}>
-                          {t.eventTitle}
-                        </h2>
-
-                        <p className="meta-text" style={{ color: 'var(--color-paper-muted)' }}>
-                          {t.venueName} • {t.venueCity}
-                        </p>
                       </div>
 
-                      {/* Attendee Details & Actions */}
-                      <div
-                        style={{
-                          borderTop: '1px solid rgba(244, 241, 234, 0.1)',
-                          paddingTop: '1rem',
-                          marginTop: '1rem',
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          flexWrap: 'wrap',
-                          gap: '1rem',
-                        }}
-                      >
-                        <div>
-                          <div className="meta-text-sm" style={{ color: 'var(--color-paper-muted)' }}>
-                            PASS HOLDER
-                          </div>
-                          <div style={{ fontFamily: 'var(--font-sans-stack)', fontWeight: 600, fontSize: '1rem' }}>
-                            {t.attendeeName}
-                          </div>
-                        </div>
+                      {/* Perforation Divider with Notches */}
+                      <div className="ticket-perforation-v" />
 
+                      {/* Detachable Stub */}
+                      <div className="ticket-stub">
                         <div>
-                          <div className="meta-text-sm" style={{ color: 'var(--color-paper-muted)' }}>
-                            ORDER REF
-                          </div>
-                          <div className="meta-text" style={{ color: 'var(--color-paper)' }}>
-                            {t.orderNumber}
-                          </div>
-                        </div>
-
-                        <div>
-                          <a
-                            href={`http://localhost:4000/api/v1/tickets/${t.id}/print`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn btn-secondary btn-sm"
-                            style={{ textDecoration: 'none' }}
+                          <div
+                            style={{
+                              fontFamily: 'var(--font-sans-stack)',
+                              fontSize: '2.5rem',
+                              fontWeight: 800,
+                              lineHeight: 1,
+                              color: 'var(--color-paper)',
+                            }}
                           >
-                            📄 PRINT PASS (XML)
-                          </a>
+                            {t.dayNumber}
+                          </div>
+                          <div
+                            className="meta-text-sm"
+                            style={{ color: 'var(--color-paper-muted)', marginTop: '0.2rem' }}
+                          >
+                            {t.monthYear}
+                          </div>
                         </div>
-                      </div>
-                    </div>
 
-                    {/* Perforation Divider with Notches */}
-                    <div className="ticket-perforation-v" />
-
-                    {/* Detachable Stub */}
-                    <div className="ticket-stub">
-                      <div>
-                        <div
-                          style={{
-                            fontFamily: 'var(--font-sans-stack)',
-                            fontSize: '2.5rem',
-                            fontWeight: 800,
-                            lineHeight: 1,
-                            color: 'var(--color-paper)',
-                          }}
-                        >
-                          {t.dayNumber}
+                        {/* Barcode / QR Placeholder */}
+                        <div style={{ width: '100%', padding: '0.5rem 0' }}>
+                          <div
+                            style={{
+                              height: '42px',
+                              background:
+                                'repeating-linear-gradient(90deg, #F4F1EA, #F4F1EA 2px, transparent 2px, transparent 4px, #F4F1EA 4px, #F4F1EA 7px, transparent 7px, transparent 9px)',
+                              opacity: 0.85,
+                            }}
+                          />
+                          <div
+                            className="meta-text-sm"
+                            style={{
+                              fontSize: '0.65rem',
+                              letterSpacing: '0.08em',
+                              color: 'var(--color-paper-muted)',
+                              marginTop: '0.4rem',
+                              wordBreak: 'break-all',
+                            }}
+                          >
+                            {t.ticketCode}
+                          </div>
                         </div>
-                        <div className="meta-text-sm" style={{ color: 'var(--color-paper-muted)', marginTop: '0.2rem' }}>
-                          {t.monthYear}
-                        </div>
-                      </div>
 
-                      {/* Barcode Placeholder */}
-                      <div style={{ width: '100%', padding: '0.5rem 0' }}>
-                        <div
-                          style={{
-                            height: '42px',
-                            background:
-                              'repeating-linear-gradient(90deg, #F4F1EA, #F4F1EA 2px, transparent 2px, transparent 4px, #F4F1EA 4px, #F4F1EA 7px, transparent 7px, transparent 9px)',
-                            opacity: 0.85,
-                          }}
-                        />
                         <div
                           className="meta-text-sm"
-                          style={{
-                            fontSize: '0.65rem',
-                            letterSpacing: '0.08em',
-                            color: 'var(--color-paper-muted)',
-                            marginTop: '0.4rem',
-                            wordBreak: 'break-all',
-                          }}
+                          style={{ color: 'var(--color-cyan)', fontSize: '0.7rem' }}
                         >
-                          {t.ticketCode}
+                          ● ADMIT ONE
                         </div>
                       </div>
-
-                      <div className="meta-text-sm" style={{ color: 'var(--color-cyan)', fontSize: '0.7rem' }}>
-                        ● ADMIT ONE
-                      </div>
                     </div>
-
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
@@ -341,7 +471,7 @@ export default function OrdersPage() {
                 backgroundColor: 'var(--color-surface)',
                 border: '2px solid var(--color-border)',
                 padding: '2rem',
-                boxShadow: 'var(--shadow-hard-md)',
+                boxShadow: 'var(--shadow-hard)',
               }}
             >
               <div
@@ -357,7 +487,10 @@ export default function OrdersPage() {
                 }}
               >
                 <div>
-                  <span className="badge-pill" style={{ color: 'var(--color-cyan)', borderColor: 'var(--color-cyan)' }}>
+                  <span
+                    className="badge-pill"
+                    style={{ color: 'var(--color-cyan)', borderColor: 'var(--color-cyan)' }}
+                  >
                     ORDER # PNP-2026-HYD8901
                   </span>
                   <div className="meta-text-sm" style={{ marginTop: '0.4rem' }}>
@@ -379,7 +512,9 @@ export default function OrdersPage() {
                   }}
                 >
                   <div>
-                    <div style={{ fontWeight: 700 }}>Echoes of Deccan: Fusion Music Festival 2026</div>
+                    <div style={{ fontWeight: 700 }}>
+                      Echoes of Deccan: Fusion Music Festival 2026
+                    </div>
                     <div className="meta-text-sm" style={{ color: 'var(--color-paper-muted)' }}>
                       2 × VIP All-Access Pass (Rishika Deshmukh, Aarav Deshmukh)
                     </div>
@@ -389,7 +524,6 @@ export default function OrdersPage() {
               </div>
             </div>
           )}
-
         </div>
       </main>
 

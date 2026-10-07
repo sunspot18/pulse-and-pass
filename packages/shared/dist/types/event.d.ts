@@ -24,6 +24,7 @@ export interface Event {
     doors_open_time?: string | null;
     age_restriction?: string | null;
     banner_url?: string | null;
+    is_featured?: boolean;
     created_at: string;
     updated_at: string;
 }

@@ -1,38 +1,55 @@
 /* ==========================================================================
-   PULSE & PASS — BOX OFFICE DESIGN SYSTEM
-   Strict Type Hierarchy • Color Discipline • Physical Ticket Geometry
+   PULSE & PASS — CURATED EDITORIAL BOX OFFICE DESIGN SYSTEM
+   Warm Tactile Parchment • Museum Box Office Elegance • Terracotta Accents
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
    1. DESIGN TOKENS
    -------------------------------------------------------------------------- */
 :root {
-  /* Strict 2-Surface Color Discipline */
-  --color-ink: #0F1012;             /* Page background (deep matte carbon) */
-  --color-surface: #17181B;         /* Ticket & card surface (one step lighter, no 3rd surface) */
+  /* Warm Tactile Palette */
+  --color-ink: #F5EFE6;                 /* Primary page background: warm parchment / sandstone */
+  --color-sandstone: #EFEAE2;           /* Slightly deeper sandstone accent background */
+  --color-surface: #FFFFFF;             /* Content surfaces & cards: pure white */
+  --color-surface-warm: #FAF8F5;        /* Subtle warm card background / secondary surface */
+  --color-surface-muted: #F2ECE1;       /* Light inset containers / badges */
+  --color-dark-panel: #1A1918;          /* High contrast deep warm black for dark feature panels & footer */
 
-  /* Text & Border Values */
-  --color-paper: #F4F1EA;           /* Crisp ticket paper off-white */
-  --color-paper-80: rgba(244, 241, 234, 0.8); /* Standard body copy at 80% opacity */
-  --color-paper-muted: #8E929B;     /* Secondary metadata & labels */
-  --color-paper-dim: #555A64;       /* Low priority serials */
-  --color-border: rgba(244, 241, 234, 0.2); /* Default 2px border (20% paper opacity) */
-  --color-border-subtle: rgba(244, 241, 234, 0.1);
+  /* Text & Typography */
+  --color-charcoal: #141414;            /* Primary headings & text: deep charcoal / near-black */
+  --color-paper: #141414;               /* Backwards compatible: mapped to deep charcoal */
+  --color-paper-80: #42403D;            /* Body copy at high readability */
+  --color-paper-muted: #6E6B67;         /* Secondary metadata, subtitles & labels */
+  --color-paper-dim: #9C9893;           /* Muted micro-labels, serial codes, timestamps */
+  --color-paper-light: #FBF9F5;         /* Light text for dark panels */
 
-  /* Functional Accents - Strict Role Discipline */
-  --color-cyan: #00F0FF;            /* Primary action buttons & focus rings ONLY */
-  --color-cyan-glow: rgba(0, 240, 255, 0.15);
-  --color-amber: #FFB800;           /* Tier / price highlights & "on sale" state ONLY */
-  --color-amber-glow: rgba(255, 184, 0, 0.15);
-  --color-void: #FF3838;            /* Error / VOID / Cancelled status ONLY */
-  --color-void-glow: rgba(255, 56, 56, 0.15);
+  /* Borders & Dividers */
+  --color-border: rgba(0, 0, 0, 0.06);   /* Subtle warm borders */
+  --color-border-subtle: rgba(0, 0, 0, 0.04);
+  --color-border-warm: rgba(200, 75, 49, 0.25);
+  --color-border-dark: rgba(255, 255, 255, 0.12); /* Borders on dark panels */
+
+  /* Signature Accents & Functional Colors */
+  --color-terracotta: #C84B31;          /* Signature Accent / CTA: Terracotta */
+  --color-terracotta-dark: #B83A24;     /* Terracotta hover & active state */
+  --color-terracotta-subtle: rgba(200, 75, 49, 0.08);
+  --color-terracotta-glow: rgba(200, 75, 49, 0.18);
+
+  /* Remapped Legacy Accents to Terracotta / Warm Tone */
+  --color-cyan: #C84B31;                /* Remapped to signature terracotta */
+  --color-cyan-glow: rgba(200, 75, 49, 0.18);
+  --color-amber: #B83A24;               /* Remapped to burnt sienna / deep terracotta */
+  --color-amber-glow: rgba(184, 58, 36, 0.18);
+  --color-void: #C92A2A;                /* Error / Sold Out */
+  --color-void-glow: rgba(201, 42, 42, 0.15);
+  --color-emerald: #2B8A3E;             /* Success / Admitted badge */
 
   /* Typography Stacks */
-  --font-display-stack: var(--font-display), 'Arial Black', sans-serif; /* Wide face: h1 and logo ONLY */
-  --font-sans-stack: var(--font-sans), system-ui, -apple-system, sans-serif; /* Normal-width bold grotesk: h2/h3 and body */
-  --font-mono-stack: var(--font-mono), 'Consolas', monospace; /* JetBrains Mono: metadata ONLY */
+  --font-display-stack: var(--font-display), 'Syne', -apple-system, sans-serif;
+  --font-sans-stack: var(--font-sans), 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-mono-stack: var(--font-mono), 'JetBrains Mono', 'Consolas', monospace;
 
-  /* Strict Spacing Scale */
+  /* Spacing Scale */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 16px;
@@ -42,13 +59,23 @@
   --space-7: 64px;
   --space-8: 96px;
 
-  /* Hard Offset Shadow - Strict 0 Blur */
-  --shadow-hard: 6px 6px 0px #000000;
-  --shadow-hard-sm: 4px 4px 0px #000000;
+  /* Shadows: Soft Warm Elevation */
+  --shadow-sm: 0 2px 8px rgba(20, 20, 20, 0.04);
+  --shadow-md: 0 6px 20px rgba(20, 20, 20, 0.06);
+  --shadow-lg: 0 12px 36px rgba(20, 20, 20, 0.08);
+  --shadow-xl: 0 20px 48px rgba(20, 20, 20, 0.12);
+  --shadow-hard: 0 8px 30px rgba(20, 20, 20, 0.06);
+  --shadow-hard-sm: 0 4px 14px rgba(20, 20, 20, 0.05);
 
-  /* Physical Ticket Geometry */
-  --notch-size: 14px;
-  --transition-tactile: 120ms cubic-bezier(0, 0, 0.2, 1);
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-card: 18px;
+  --radius-pill: 9999px;
+
+  /* Smooth Transitions */
+  --transition-smooth: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-tactile: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* --------------------------------------------------------------------------
@@ -65,7 +92,7 @@
 html {
   font-size: 16px;
   background-color: var(--color-ink);
-  color: var(--color-paper);
+  color: var(--color-charcoal);
   font-family: var(--font-sans-stack);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -77,7 +104,7 @@ html {
 body {
   min-height: 100vh;
   background-color: var(--color-ink);
-  color: var(--color-paper);
+  color: var(--color-charcoal);
   font-family: var(--font-sans-stack);
   line-height: 1.6;
   overflow-x: hidden;
@@ -86,7 +113,7 @@ body {
   flex-direction: column;
 }
 
-/* Hide or reposition Next.js dev indicator overlap */
+/* Dev overlays */
 nextjs-portal,
 [data-nextjs-toast],
 .nextjs-toast-errors-parent {
@@ -99,8 +126,8 @@ nextjs-portal,
   max-width: 1280px;
   margin-left: auto;
   margin-right: auto;
-  padding-left: clamp(1rem, 3.5vw, 2.5rem);
-  padding-right: clamp(1rem, 3.5vw, 2.5rem);
+  padding-left: clamp(1.25rem, 4vw, 3rem);
+  padding-right: clamp(1.25rem, 4vw, 3rem);
 }
 
 /* Skip Link */
@@ -108,16 +135,16 @@ nextjs-portal,
   position: absolute;
   top: -100px;
   left: var(--space-3);
-  background: var(--color-cyan);
-  color: var(--color-ink);
+  background: var(--color-terracotta);
+  color: #FFFFFF;
   font-family: var(--font-mono-stack);
   font-weight: 700;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: var(--space-2) var(--space-3);
-  border: 2px solid var(--color-ink);
-  box-shadow: var(--shadow-hard-sm);
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-md);
   z-index: 9999;
   text-decoration: none;
   transition: top var(--transition-tactile);
@@ -125,115 +152,131 @@ nextjs-portal,
 
 .skip-link:focus {
   top: var(--space-3);
-  outline: 2px solid var(--color-cyan);
+  outline: 2px solid var(--color-terracotta);
+  outline-offset: 2px;
 }
 
 /* --------------------------------------------------------------------------
-   3. TYPE HIERARCHY (Strict Scale: 12 / 14 / 16 / 20 / 28 / 44 / 72)
+   3. TYPE HIERARCHY (Editorial Curated Grotesque)
    -------------------------------------------------------------------------- */
-
-/* H1: Display wide face ONLY. Max 72px, clamps cleanly, never wraps to 3 lines */
 h1,
 .type-h1 {
   font-family: var(--font-display-stack);
-  font-size: clamp(1.75rem, 5vw, 4.5rem); /* 28px to 72px */
-  line-height: 1.05;
+  font-size: clamp(2rem, 5vw, 4.25rem);
+  line-height: 1.08;
   font-weight: 800;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.025em;
   text-transform: uppercase;
-  color: var(--color-paper);
+  color: var(--color-charcoal);
   overflow-wrap: break-word;
-  word-break: break-word;
 }
 
-/* H2: Normal-width bold grotesk. 44px (2.75rem) */
 h2,
 .type-h2 {
-  font-family: var(--font-sans-stack);
-  font-size: clamp(1.75rem, 3.5vw, 2.75rem); /* 28px to 44px */
-  line-height: 1.15;
-  font-weight: 700;
+  font-family: var(--font-display-stack);
+  font-size: clamp(1.65rem, 3.2vw, 2.5rem);
+  line-height: 1.18;
+  font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--color-paper);
+  color: var(--color-charcoal);
 }
 
-/* H3: Normal-width bold grotesk. 28px (1.75rem) */
 h3,
 .type-h3 {
   font-family: var(--font-sans-stack);
-  font-size: 1.75rem; /* 28px */
-  line-height: 1.25;
+  font-size: 1.5rem;
+  line-height: 1.3;
   font-weight: 700;
   letter-spacing: -0.015em;
-  color: var(--color-paper);
+  color: var(--color-charcoal);
 }
 
-/* H4: Normal-width bold grotesk. 20px (1.25rem) */
 h4,
 .type-h4 {
   font-family: var(--font-sans-stack);
-  font-size: 1.25rem; /* 20px */
+  font-size: 1.2rem;
   line-height: 1.35;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.01em;
-  color: var(--color-paper);
+  color: var(--color-charcoal);
 }
 
-/* Body Copy: Space Grotesk, 16-18px, sentence case, max-width 65ch, 80% opacity */
 p,
 .type-body {
   font-family: var(--font-sans-stack);
-  font-size: 1rem; /* 16px */
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.65;
   font-weight: 400;
   color: var(--color-paper-80);
-  max-width: 65ch;
+  max-width: 68ch;
 }
 
 .type-body-lg {
   font-family: var(--font-sans-stack);
-  font-size: 1.125rem; /* 18px */
-  line-height: 1.6;
+  font-size: 1.125rem;
+  line-height: 1.65;
   font-weight: 400;
   color: var(--color-paper-80);
-  max-width: 65ch;
+  max-width: 68ch;
 }
 
-/* Metadata Text: JetBrains Mono ONLY, 12-14px, uppercase, 0.08em max letter-spacing */
+/* Section Header with Wide Tracking */
+.section-header-kicker {
+  font-family: var(--font-mono-stack);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-terracotta);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.section-header-kicker::before {
+  content: '';
+  display: inline-block;
+  width: 14px;
+  height: 2px;
+  background-color: var(--color-terracotta);
+}
+
+/* Metadata Text */
 .meta-text,
 .meta-label {
   font-family: var(--font-mono-stack);
-  font-size: 0.875rem; /* 14px */
+  font-size: 0.8125rem;
   line-height: 1.4;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-paper-muted);
-}
-
-.meta-text-sm {
-  font-family: var(--font-mono-stack);
-  font-size: 0.75rem; /* 12px */
-  line-height: 1.3;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--color-paper-muted);
 }
 
-/* Numeric / Price Displays: Mono, Amber for on-sale highlight */
+.meta-text-sm {
+  font-family: var(--font-mono-stack);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-paper-muted);
+}
+
+/* Numeric / Price Displays: Terracotta High Contrast */
 .price-tag {
   font-family: var(--font-mono-stack);
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--color-amber);
+  color: var(--color-terracotta);
 }
 
 .price-tag-lg {
   font-family: var(--font-mono-stack);
   font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--color-amber);
+  font-weight: 800;
+  color: var(--color-terracotta);
 }
 
 /* --------------------------------------------------------------------------
@@ -243,124 +286,163 @@ p,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
-  font-family: var(--font-mono-stack);
+  gap: 0.5rem;
+  font-family: var(--font-sans-stack);
   font-size: 0.875rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   padding: 0.75rem 1.5rem;
-  min-height: 48px;
+  min-height: 44px;
   cursor: pointer;
   text-decoration: none;
-  border-radius: 0;
-  transition: transform var(--transition-tactile), box-shadow var(--transition-tactile);
-  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  transition: all var(--transition-tactile);
 }
 
-/* Primary Action: Cyan ONLY */
-.btn-cyan {
-  background-color: var(--color-cyan);
-  color: var(--color-ink);
-  border-color: var(--color-cyan);
-  box-shadow: var(--shadow-hard-sm);
+/* Primary Action: Terracotta */
+.btn-cyan,
+.btn-primary {
+  background-color: var(--color-terracotta);
+  color: #FFFFFF;
+  border-color: var(--color-terracotta);
+  box-shadow: 0 4px 14px rgba(200, 75, 49, 0.22);
 }
 
-.btn-cyan:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px #000000;
+.btn-cyan:hover,
+.btn-primary:hover {
+  background-color: var(--color-terracotta-dark);
+  border-color: var(--color-terracotta-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(200, 75, 49, 0.32);
 }
 
-.btn-cyan:active {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0px #000000;
+.btn-cyan:active,
+.btn-primary:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(200, 75, 49, 0.2);
 }
 
-.btn-cyan:focus-visible {
-  outline: 2px solid var(--color-cyan);
-  outline-offset: 4px;
+.btn-cyan:focus-visible,
+.btn-primary:focus-visible {
+  outline: 2px solid var(--color-terracotta);
+  outline-offset: 3px;
 }
 
-/* Secondary Button: Default 2px Paper at 20% opacity */
+/* Secondary Button: Pure White Card with Warm Border */
 .btn-secondary {
   background-color: var(--color-surface);
-  color: var(--color-paper);
-  border: 2px solid var(--color-border);
-  box-shadow: var(--shadow-hard-sm);
+  color: var(--color-charcoal);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-secondary:hover {
-  border-color: var(--color-paper);
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px #000000;
+  border-color: var(--color-charcoal);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  background-color: #FFFFFF;
 }
 
 .btn-secondary:active {
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0px #000000;
+  transform: translateY(1px);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-secondary:focus-visible {
-  outline: 2px solid var(--color-cyan);
-  outline-offset: 4px;
+  outline: 2px solid var(--color-terracotta);
+  outline-offset: 3px;
 }
 
 /* Ghost Button */
 .btn-ghost {
   background: transparent;
-  color: var(--color-paper);
-  border: 2px solid var(--color-border);
+  color: var(--color-charcoal);
+  border: 1px solid var(--color-border);
 }
 
 .btn-ghost:hover {
-  border-color: var(--color-paper);
-  background: rgba(244, 241, 234, 0.05);
+  border-color: var(--color-charcoal);
+  background: rgba(20, 20, 20, 0.04);
 }
 
 .btn-ghost:focus-visible {
-  outline: 2px solid var(--color-cyan);
-  outline-offset: 4px;
+  outline: 2px solid var(--color-terracotta);
+  outline-offset: 3px;
+}
+
+/* Pill Button */
+.btn-pill {
+  border-radius: var(--radius-pill);
 }
 
 /* Small Button Variant */
 .btn-sm {
-  min-height: 38px;
-  padding: 0.5rem 1rem;
-  font-size: 0.75rem;
+  min-height: 36px;
+  padding: 0.45rem 1rem;
+  font-size: 0.8125rem;
 }
 
 /* --------------------------------------------------------------------------
-   5. TICKET COMPONENT (Edge-Notched Semicircles & Hard Offset Shadow)
+   5. CURATED GALLERY ENTRY & TICKET CARDS (Generous 18px Radii & Warm Tactile)
    -------------------------------------------------------------------------- */
 
-/* Outer wrapper carries the 6px hard shadow that contours around the notches */
+/* Outer wrapper with subtle warm shadow and smooth hover elevation */
 .ticket-wrapper {
   position: relative;
   width: 100%;
-  filter: drop-shadow(var(--shadow-hard));
+  border-radius: var(--radius-card);
+  transition: transform var(--transition-tactile), box-shadow var(--transition-tactile);
 }
 
-/* Ticket Slab: Surface #17181B, 2px border at 20% paper opacity */
+.ticket-wrapper:hover {
+  transform: translateY(-3px);
+}
+
+/* Ticket Slab: Pure White Surface (#FFFFFF), Subtle Warm Border */
 .ticket-row {
   width: 100%;
   background-color: var(--color-surface);
-  border: 2px solid var(--color-border);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: row;
   align-items: stretch;
   position: relative;
-  overflow: visible;
+  overflow: hidden;
   text-decoration: none;
   color: inherit;
-  transition: transform var(--transition-tactile);
+  transition: border-color var(--transition-tactile), box-shadow var(--transition-tactile);
 }
 
 .ticket-wrapper:hover .ticket-row {
-  border-color: rgba(244, 241, 234, 0.4);
-  transform: translateY(-2px);
+  border-color: rgba(200, 75, 49, 0.25);
+  box-shadow: var(--shadow-card-hover, var(--shadow-hard));
 }
 
-/* Desktop Horizontal Ticket with Right-Side Stub */
+/* Gallery Poster Thumbnail Frame */
+.ticket-poster-thumb {
+  width: 160px;
+  min-height: 100%;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  background-color: var(--color-surface-muted);
+}
+
+.ticket-poster-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ticket-wrapper:hover .ticket-poster-thumb img {
+  transform: scale(1.05);
+}
+
+/* Horizontal Ticket Body */
 .ticket-body {
   flex: 1;
   padding: clamp(1.25rem, 2.5vw, 2rem);
@@ -368,41 +450,41 @@ p,
   flex-direction: column;
   justify-content: space-between;
   gap: 1rem;
-  min-width: 0; /* Prevents text overflow */
+  min-width: 0;
 }
 
-/* Perforation Divider (vertical line on desktop) */
+/* Perforation Divider (delicate vertical dashed separator) */
 .ticket-perforation-v {
   position: relative;
   width: 0px;
-  border-left: 2px dashed rgba(244, 241, 234, 0.25);
+  border-left: 1px dashed rgba(20, 20, 20, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Semicircle notches cut ON THE TOP AND BOTTOM EDGES at the perforation line */
+/* Semicircle notches cut ON TOP AND BOTTOM EDGES */
 .ticket-perforation-v::before,
 .ticket-perforation-v::after {
   content: '';
   position: absolute;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   background-color: var(--color-ink);
   border-radius: 50%;
   z-index: 5;
 }
 
 .ticket-perforation-v::before {
-  top: -14px;
-  left: -12px;
-  border-bottom: 2px solid var(--color-border);
+  top: -10px;
+  left: -10px;
+  box-shadow: inset 0 -1px 2px rgba(20, 20, 20, 0.08);
 }
 
 .ticket-perforation-v::after {
-  bottom: -14px;
-  left: -12px;
-  border-top: 2px solid var(--color-border);
+  bottom: -10px;
+  left: -10px;
+  box-shadow: inset 0 1px 2px rgba(20, 20, 20, 0.08);
 }
 
 /* Ticket Stub Right */
@@ -410,7 +492,7 @@ p,
   width: 220px;
   flex-shrink: 0;
   padding: 1.5rem 1.25rem;
-  background-color: rgba(15, 16, 18, 0.4);
+  background-color: var(--color-surface-warm);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -419,111 +501,105 @@ p,
   gap: 0.75rem;
 }
 
-/* Horizontal Perforation (for mobile or stacked ticket cards) */
+/* Horizontal Perforation (for mobile) */
 .ticket-perforation-h {
   position: relative;
   width: 100%;
   height: 0px;
-  border-top: 2px dashed rgba(244, 241, 234, 0.25);
-  margin: 1rem 0;
+  border-top: 1px dashed rgba(20, 20, 20, 0.15);
+  margin: 0.75rem 0;
 }
 
-/* Semicircles cut ON LEFT AND RIGHT EDGES */
 .ticket-perforation-h::before,
 .ticket-perforation-h::after {
   content: '';
   position: absolute;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   background-color: var(--color-ink);
   border-radius: 50%;
   z-index: 5;
-  top: -12px;
+  top: -10px;
 }
 
 .ticket-perforation-h::before {
-  left: -14px;
-  border-right: 2px solid var(--color-border);
+  left: -10px;
 }
 
 .ticket-perforation-h::after {
-  right: -14px;
-  border-left: 2px solid var(--color-border);
-}
-
-/* Masked Edge Notches Variant (uses CSS mask-image radial-gradient) */
-.ticket-notched-edges {
-  -webkit-mask-image:
-    radial-gradient(circle 12px at 0% 50%, transparent 12px, #000 12.5px),
-    radial-gradient(circle 12px at 100% 50%, transparent 12px, #000 12.5px);
-  -webkit-mask-composite: source-in;
-  mask-image:
-    radial-gradient(circle 12px at 0% 50%, transparent 12px, #000 12.5px),
-    radial-gradient(circle 12px at 100% 50%, transparent 12px, #000 12.5px);
-  mask-composite: intersect;
+  right: -10px;
 }
 
 /* --------------------------------------------------------------------------
-   6. STAMPS & BADGES (Rotated -3deg, Max one per ticket)
+   6. STAMPS & BADGES (Curated Editorial Styling)
    -------------------------------------------------------------------------- */
 .stamp {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font-family: var(--font-mono-stack);
   font-size: 0.75rem;
-  font-weight: 800;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  padding: 0.35rem 0.75rem;
-  border-width: 2px;
+  letter-spacing: 0.08em;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-pill);
+  border-width: 1px;
   border-style: solid;
-  transform: rotate(-3deg);
   white-space: nowrap;
   line-height: 1;
-  pointer-events: none;
-  user-select: none;
 }
 
-/* ON SALE: Amber ONLY */
+/* ON SALE: Terracotta Pill */
 .stamp-onsale {
-  color: var(--color-amber);
-  border-color: var(--color-amber);
-  background-color: rgba(255, 184, 0, 0.08);
+  color: var(--color-terracotta);
+  border-color: rgba(200, 75, 49, 0.3);
+  background-color: var(--color-terracotta-subtle);
 }
 
-/* ADMITTED / GATE OPEN: Cyan ONLY */
+/* ADMITTED / PASS ACTIVE: Emerald Pill */
 .stamp-admitted {
-  color: var(--color-cyan);
-  border-color: var(--color-cyan);
-  background-color: rgba(0, 240, 255, 0.08);
+  color: var(--color-emerald);
+  border-color: rgba(43, 138, 62, 0.3);
+  background-color: rgba(43, 138, 62, 0.08);
 }
 
-/* SOLD OUT / VOID: Red ONLY */
+/* SOLD OUT / VOID: Warm Charcoal / Red */
 .stamp-void {
   color: var(--color-void);
-  border-color: var(--color-void);
-  background-color: rgba(255, 56, 56, 0.08);
+  border-color: rgba(201, 42, 42, 0.3);
+  background-color: rgba(201, 42, 42, 0.08);
 }
 
-/* Headliner Stamp: Amber */
+/* Headliner Stamp */
 .stamp-headliner {
-  color: var(--color-amber);
-  border-color: var(--color-amber);
-  background-color: rgba(255, 184, 0, 0.12);
-  font-size: 0.875rem;
-  padding: 0.45rem 0.9rem;
+  color: var(--color-terracotta);
+  border-color: rgba(200, 75, 49, 0.3);
+  background-color: rgba(200, 75, 49, 0.1);
+  font-size: 0.8125rem;
+  padding: 0.35rem 0.85rem;
 }
 
-/* Subtle Meta Badge (No rotation) */
+/* Pill Tags (0.75rem, uppercase, bold) */
 .badge-pill {
+  display: inline-flex;
+  align-items: center;
   font-family: var(--font-mono-stack);
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 0.25rem 0.6rem;
-  background-color: rgba(244, 241, 234, 0.08);
+  letter-spacing: 0.08em;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-pill);
+  background-color: rgba(20, 20, 20, 0.05);
   border: 1px solid var(--color-border);
   color: var(--color-paper-muted);
+}
+
+.badge-terracotta {
+  background-color: var(--color-terracotta-subtle);
+  border-color: rgba(200, 75, 49, 0.25);
+  color: var(--color-terracotta);
 }
 
 /* --------------------------------------------------------------------------
@@ -532,20 +608,19 @@ p,
 .input-box {
   width: 100%;
   background-color: var(--color-surface);
-  border: 2px solid var(--color-border);
-  color: var(--color-paper);
+  border: 1px solid rgba(20, 20, 20, 0.12);
+  color: var(--color-charcoal);
   font-family: var(--font-sans-stack);
-  font-size: 0.95rem;
-  padding: 0.75rem 1rem;
-  border-radius: 0;
+  font-size: 0.9375rem;
+  padding: 0.75rem 1.125rem;
+  border-radius: var(--radius-md);
   outline: none;
-  transition: border-color var(--transition-tactile);
+  transition: border-color var(--transition-tactile), box-shadow var(--transition-tactile);
 }
 
 .input-box:focus {
-  border-color: var(--color-cyan);
-  outline: 2px solid var(--color-cyan);
-  outline-offset: -2px;
+  border-color: var(--color-terracotta);
+  box-shadow: 0 0 0 3px rgba(200, 75, 49, 0.14);
 }
 
 .input-box::placeholder {
@@ -553,36 +628,91 @@ p,
 }
 
 /* --------------------------------------------------------------------------
-   8. RESPONSIVE BREAKPOINTS (Mobile Stacking)
+   8. DARK CONTRAST PANELS & FOOTER (#1A1918)
+   -------------------------------------------------------------------------- */
+.dark-panel {
+  background-color: var(--color-dark-panel);
+  color: var(--color-paper-light);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dark-panel h1,
+.dark-panel h2,
+.dark-panel h3,
+.dark-panel h4 {
+  color: #FFFFFF;
+}
+
+.dark-panel p {
+  color: rgba(251, 249, 245, 0.75);
+}
+
+/* --------------------------------------------------------------------------
+   9. EDITORIAL GALLERY MOSAIC & CARDS
+   -------------------------------------------------------------------------- */
+.gallery-mosaic-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-tactile), box-shadow var(--transition-tactile);
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+}
+
+.gallery-mosaic-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(200, 75, 49, 0.3);
+}
+
+.gallery-mosaic-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.gallery-mosaic-card:hover img {
+  transform: scale(1.04);
+}
+
+/* --------------------------------------------------------------------------
+   10. RESPONSIVE BREAKPOINTS
    -------------------------------------------------------------------------- */
 @media (max-width: 768px) {
   .ticket-row {
     flex-direction: column;
   }
 
+  .ticket-poster-thumb {
+    width: 100%;
+    height: 180px;
+  }
+
   .ticket-perforation-v {
     width: 100%;
     height: 0px;
     border-left: none;
-    border-top: 2px dashed rgba(244, 241, 234, 0.25);
+    border-top: 1px dashed rgba(20, 20, 20, 0.15);
   }
 
   .ticket-perforation-v::before,
   .ticket-perforation-v::after {
-    top: -12px;
+    top: -10px;
   }
 
   .ticket-perforation-v::before {
-    left: -14px;
-    border-right: 2px solid var(--color-border);
-    border-bottom: none;
+    left: -10px;
   }
 
   .ticket-perforation-v::after {
     left: auto;
-    right: -14px;
-    border-left: 2px solid var(--color-border);
-    border-top: none;
+    right: -10px;
   }
 
   .ticket-stub {
@@ -596,18 +726,19 @@ p,
 /* Styleguide Responsive Grid */
 .styleguide-grid {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
+  grid-template-columns: 240px minmax(0, 1fr);
   gap: 3rem;
   align-items: start;
 }
 
 .styleguide-sidebar {
   position: sticky;
-  top: 84px;
+  top: 96px;
   background-color: var(--color-surface);
-  border: 2px solid var(--color-border);
-  padding: 1.25rem;
-  box-shadow: var(--shadow-hard-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
 }
 
 @media (max-width: 860px) {
@@ -627,7 +758,7 @@ p,
   display: flex;
   justify-content: space-between;
   align-items: center;
-  min-height: 64px;
+  min-height: 70px;
   padding-top: 0.75rem;
   padding-bottom: 0.75rem;
   gap: 1.5rem;
@@ -636,12 +767,12 @@ p,
 .navbar-brand {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
   font-family: var(--font-display-stack);
   font-size: 1.25rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--color-paper);
+  color: var(--color-charcoal);
   text-decoration: none;
   flex-shrink: 0;
 }
@@ -649,7 +780,7 @@ p,
 .navbar-nav {
   display: flex;
   align-items: center;
-  gap: 1.75rem;
+  gap: 0.75rem;
 }
 
 .navbar-actions {
@@ -683,7 +814,7 @@ p,
     min-height: auto;
     padding-top: 0.75rem;
     padding-bottom: 0.5rem;
-    gap: 0.5rem;
+    gap: 0.65rem;
   }
 
   .navbar-top-row {
@@ -694,21 +825,23 @@ p,
   }
 
   .navbar-brand {
-    font-size: 1.05rem;
+    font-size: 1.1rem;
   }
 
   .navbar-nav {
     display: flex;
     justify-content: space-between;
-    padding-top: 0.4rem;
-    border-top: 1px solid rgba(244, 241, 234, 0.12);
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--color-border);
     gap: 0.5rem;
+    overflow-x: auto;
   }
 
   .navbar-nav a {
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
   }
 }
+
 
 
 

@@ -16,6 +16,15 @@ const envSchema = z.object({
     .default('postgresql://postgres:postgrespassword@localhost:5432/pulse_and_pass'),
   JWT_SECRET: z.string().min(16, 'JWT_SECRET must be at least 16 characters long'),
   HMAC_SECRET: z.string().min(16, 'HMAC_SECRET must be at least 16 characters long'),
+  FORCE_PGLITE: z
+    .string()
+    .optional()
+    .transform((val) => val === 'true'),
+  PGLITE_MEMORY: z
+    .string()
+    .optional()
+    .transform((val) => val === 'true'),
+  PGLITE_DATA_DIR: z.string().optional(),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);

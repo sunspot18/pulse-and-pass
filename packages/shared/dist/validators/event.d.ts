@@ -97,6 +97,7 @@ export declare const createEventSchema: z.ZodObject<{
     doors_open_time: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     age_restriction: z.ZodDefault<z.ZodString>;
     banner_url: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+    is_featured: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
     tiers: z.ZodArray<z.ZodObject<{
         name: z.ZodString;
         description: z.ZodOptional<z.ZodString>;
@@ -145,6 +146,7 @@ export declare const createEventSchema: z.ZodObject<{
     } | undefined;
     doors_open_time?: string | null | undefined;
     banner_url?: string | null | undefined;
+    is_featured?: boolean | undefined;
 }, {
     description: string;
     title: string;
@@ -171,6 +173,7 @@ export declare const createEventSchema: z.ZodObject<{
     doors_open_time?: string | null | undefined;
     age_restriction?: string | undefined;
     banner_url?: string | null | undefined;
+    is_featured?: boolean | undefined;
 }>;
 export declare const updateEventSchema: z.ZodObject<{
     title: z.ZodOptional<z.ZodString>;
@@ -182,6 +185,7 @@ export declare const updateEventSchema: z.ZodObject<{
     doors_open_time: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     age_restriction: z.ZodOptional<z.ZodString>;
     banner_url: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+    is_featured: z.ZodOptional<z.ZodBoolean>;
 }, "strip", z.ZodTypeAny, {
     description?: string | undefined;
     venue_id?: string | undefined;
@@ -192,6 +196,7 @@ export declare const updateEventSchema: z.ZodObject<{
     doors_open_time?: string | null | undefined;
     age_restriction?: string | undefined;
     banner_url?: string | null | undefined;
+    is_featured?: boolean | undefined;
 }, {
     description?: string | undefined;
     venue_id?: string | undefined;
@@ -202,6 +207,7 @@ export declare const updateEventSchema: z.ZodObject<{
     doors_open_time?: string | null | undefined;
     age_restriction?: string | undefined;
     banner_url?: string | null | undefined;
+    is_featured?: boolean | undefined;
 }>;
 export declare const eventQuerySchema: z.ZodObject<{
     search: z.ZodOptional<z.ZodString>;
@@ -212,6 +218,7 @@ export declare const eventQuerySchema: z.ZodObject<{
     date_to: z.ZodOptional<z.ZodString>;
     min_price: z.ZodOptional<z.ZodNumber>;
     max_price: z.ZodOptional<z.ZodNumber>;
+    is_featured: z.ZodEffects<z.ZodOptional<z.ZodBoolean>, boolean | undefined, unknown>;
     page: z.ZodDefault<z.ZodNumber>;
     limit: z.ZodDefault<z.ZodNumber>;
 }, "strip", z.ZodTypeAny, {
@@ -220,6 +227,7 @@ export declare const eventQuerySchema: z.ZodObject<{
     status?: "draft" | "published" | "cancelled" | "completed" | undefined;
     city?: string | undefined;
     category?: string | undefined;
+    is_featured?: boolean | undefined;
     search?: string | undefined;
     date_from?: string | undefined;
     date_to?: string | undefined;
@@ -229,6 +237,7 @@ export declare const eventQuerySchema: z.ZodObject<{
     status?: "draft" | "published" | "cancelled" | "completed" | undefined;
     city?: string | undefined;
     category?: string | undefined;
+    is_featured?: unknown;
     search?: string | undefined;
     date_from?: string | undefined;
     date_to?: string | undefined;

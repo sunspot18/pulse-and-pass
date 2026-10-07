@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Syne, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import '../styles/globals.css';
+import { ToastProvider } from '../components/Toast';
 
 const syne = Syne({
   subsets: ['latin'],
@@ -34,19 +35,24 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#0F1012',
+  themeColor: '#F5EFE6',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${syne.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
+    <html
+      lang="en"
+      className={`${syne.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}
+    >
       <body>
         <a href="#main-content" className="skip-link">
           Skip to Admission Content [TAB]
         </a>
-        <main id="main-content" className="content-wrapper">
-          {children}
-        </main>
+        <ToastProvider>
+          <main id="main-content" className="content-wrapper">
+            {children}
+          </main>
+        </ToastProvider>
       </body>
     </html>
   );

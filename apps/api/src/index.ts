@@ -13,9 +13,15 @@ async function bootstrap() {
     console.log(`🩺  Health Check: http://localhost:${ENV.PORT}/api/v1/health`);
   });
 
-  const gracefulShutdown = () => {
+  const gracefulShutdown = async () => {
     console.log('\n🛑  Shutting down Pulse & Pass API gracefully...');
     ExpiryWorker.stop();
+    try {
+      const { db } = await import('./config/db.js');
+      await db.end();
+    } catch {
+      // Ignore errors during db teardown
+    }
     server.close(() => {
       console.log('🏁  HTTP server closed.');
       process.exit(0);

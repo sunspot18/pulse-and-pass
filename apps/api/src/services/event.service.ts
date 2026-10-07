@@ -27,6 +27,7 @@ interface EventListRow {
   doors_open_time: string | null;
   age_restriction: string | null;
   banner_url: string | null;
+  is_featured?: boolean | null;
   created_at: string;
   updated_at: string;
   venue_name: string;
@@ -55,6 +56,7 @@ interface EventDetailRow {
   doors_open_time: string | null;
   age_restriction: string | null;
   banner_url: string | null;
+  is_featured?: boolean | null;
   created_at: string;
   updated_at: string;
   venue_name: string;
@@ -66,6 +68,17 @@ interface EventDetailRow {
   organizer_name: string | null;
 }
 
+let featuredColumnChecked = false;
+async function ensureFeaturedColumn() {
+  if (featuredColumnChecked) return;
+  try {
+    await db.query(`ALTER TABLE events ADD COLUMN IF NOT EXISTS is_featured BOOLEAN NOT NULL DEFAULT FALSE;`);
+    featuredColumnChecked = true;
+  } catch {
+    // Graceful fallback
+  }
+}
+
 export class EventService {
   /**
    * Retrieves events matching lineup filter criteria
@@ -73,6 +86,7 @@ export class EventService {
   static async listEvents(
     query: EventQueryInput,
   ): Promise<{ events: EventDetail[]; total: number; page: number; limit: number; totalPages: number }> {
+    await ensureFeaturedColumn();
     const conditions: string[] = [];
     const params: unknown[] = [];
     let pIdx = 1;
@@ -111,6 +125,11 @@ export class EventService {
       params.push(query.date_to);
     }
 
+    if (query.is_featured !== undefined) {
+      conditions.push(`e.is_featured = $${pIdx++}`);
+      params.push(query.is_featured);
+    }
+
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
     // Total count
@@ -131,6 +150,7 @@ export class EventService {
     const eventsSql = `
       SELECT e.id, e.organizer_id, e.venue_id, e.title, e.slug, e.description, e.category,
              e.status, e.start_time, e.end_time, e.doors_open_time, e.age_restriction, e.banner_url,
+             COALESCE(e.is_featured, false) as is_featured,
              e.created_at, e.updated_at,
              v.name as venue_name, v.address as venue_address, v.city as venue_city,
              v.state as venue_state, v.postal_code as venue_postal_code, v.capacity as venue_capacity,
@@ -144,7 +164,7 @@ export class EventService {
       LEFT JOIN ticket_tiers t ON e.id = t.event_id
       ${whereClause}
       GROUP BY e.id, v.id, u.name
-      ORDER BY e.start_time ASC
+      ORDER BY e.is_featured DESC, e.start_time ASC
       LIMIT $${pIdx++} OFFSET $${pIdx++};
     `;
 
@@ -164,6 +184,7 @@ export class EventService {
       doors_open_time: row.doors_open_time,
       age_restriction: row.age_restriction,
       banner_url: row.banner_url,
+      is_featured: Boolean(row.is_featured),
       created_at: row.created_at,
       updated_at: row.updated_at,
       organizer_name: row.organizer_name,
@@ -196,11 +217,13 @@ export class EventService {
    * Retrieves single event with venue and live ticket tiers availability
    */
   static async getEventById(id: string): Promise<EventDetail | null> {
+    await ensureFeaturedColumn();
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
     const eventSql = `
       SELECT e.id, e.organizer_id, e.venue_id, e.title, e.slug, e.description, e.category,
              e.status, e.start_time, e.end_time, e.doors_open_time, e.age_restriction, e.banner_url,
+             COALESCE(e.is_featured, false) as is_featured,
              e.created_at, e.updated_at,
              v.name as venue_name, v.address as venue_address, v.city as venue_city,
              v.state as venue_state, v.postal_code as venue_postal_code, v.capacity as venue_capacity,
@@ -248,6 +271,7 @@ export class EventService {
       doors_open_time: row.doors_open_time,
       age_restriction: row.age_restriction,
       banner_url: row.banner_url,
+      is_featured: Boolean(row.is_featured),
       created_at: row.created_at,
       updated_at: row.updated_at,
       organizer_name: row.organizer_name,
@@ -270,6 +294,7 @@ export class EventService {
    * Creates event with venue and tiers in a transaction
    */
   static async createEvent(input: CreateEventInput, organizerId: string): Promise<EventDetail> {
+    await ensureFeaturedColumn();
     const client = await db.connect();
 
     try {
@@ -309,9 +334,9 @@ export class EventService {
 
       // 2. Insert event
       const evRes = await client.query<Event>(
-        `INSERT INTO events (organizer_id, venue_id, title, slug, description, category, status, start_time, end_time, doors_open_time, age_restriction, banner_url)
-         VALUES ($1, $2, $3, $4, $5, $6, 'published', $7, $8, $9, $10, $11)
-         RETURNING id, organizer_id, venue_id, title, slug, description, category, status, start_time, end_time, doors_open_time, age_restriction, banner_url, created_at, updated_at;`,
+        `INSERT INTO events (organizer_id, venue_id, title, slug, description, category, status, start_time, end_time, doors_open_time, age_restriction, banner_url, is_featured)
+         VALUES ($1, $2, $3, $4, $5, $6, 'published', $7, $8, $9, $10, $11, $12)
+         RETURNING id, organizer_id, venue_id, title, slug, description, category, status, start_time, end_time, doors_open_time, age_restriction, banner_url, is_featured, created_at, updated_at;`,
         [
           organizerId,
           venueId,
@@ -324,6 +349,7 @@ export class EventService {
           input.doors_open_time || null,
           input.age_restriction || 'All Ages',
           input.banner_url || null,
+          Boolean(input.is_featured),
         ],
       );
 
@@ -379,6 +405,7 @@ export class EventService {
     organizerId: string,
     isAdmin = false,
   ): Promise<EventDetail> {
+    await ensureFeaturedColumn();
     const existing = await this.getEventById(id);
     if (!existing) {
       throw new AppError('Event not found', 404, 'EVENT_NOT_FOUND');
@@ -427,6 +454,10 @@ export class EventService {
     if (input.banner_url !== undefined) {
       updates.push(`banner_url = $${pIdx++}`);
       params.push(input.banner_url);
+    }
+    if (input.is_featured !== undefined) {
+      updates.push(`is_featured = $${pIdx++}`);
+      params.push(Boolean(input.is_featured));
     }
 
     if (updates.length > 0) {

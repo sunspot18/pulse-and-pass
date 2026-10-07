@@ -37,6 +37,7 @@ export const createEventSchema = z.object({
   doors_open_time: z.string().datetime().optional().nullable(),
   age_restriction: z.string().trim().max(50).default('All Ages'),
   banner_url: z.string().url().optional().nullable(),
+  is_featured: z.boolean().default(false).optional(),
   tiers: z.array(createTierSchema).min(1, 'At least one ticket tier is required'),
 });
 
@@ -50,6 +51,7 @@ export const updateEventSchema = z.object({
   doors_open_time: z.string().datetime().optional().nullable(),
   age_restriction: z.string().trim().max(50).optional(),
   banner_url: z.string().url().optional().nullable(),
+  is_featured: z.boolean().optional(),
 });
 
 export const eventQuerySchema = z.object({
@@ -61,6 +63,12 @@ export const eventQuerySchema = z.object({
   date_to: z.string().optional(),
   min_price: z.coerce.number().optional(),
   max_price: z.coerce.number().optional(),
+  is_featured: z
+    .preprocess((val) => {
+      if (val === 'true' || val === true) return true;
+      if (val === 'false' || val === false) return false;
+      return undefined;
+    }, z.boolean().optional()),
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(12),
 });

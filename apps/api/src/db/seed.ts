@@ -10,6 +10,20 @@ export async function seedDatabase() {
   const client = await db.connect();
 
   try {
+    // Ensure schema is applied before clearing and seeding
+    const tableCheck = await client.query<{ exists: boolean }>(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'users'
+      );
+    `);
+    if (!tableCheck.rows[0]?.exists) {
+      console.log('🔨  Schema missing before seed. Applying migrations first...');
+      const { runMigrations } = await import('./migrate.js');
+      await runMigrations();
+    }
+
     await client.query('BEGIN');
 
     // 1. Clear existing seed data gracefully
@@ -75,6 +89,7 @@ export async function seedDatabase() {
         desc: 'A three-stage sonic convergence of Carnatic prog-rock, electronic synthesis, and Sufi acoustic ensembles under the Hyderabad night sky.',
         category: 'music',
         status: 'published',
+        isFeatured: true,
         venueId: 'a0000000-0000-0000-0000-000000000001',
         orgId: '22222222-2222-2222-2222-222222222221',
         startTime: '2026-11-14T17:00:00Z',
@@ -94,6 +109,7 @@ export async function seedDatabase() {
         desc: 'The annual congregation of high-throughput distributed systems engineers, compiler designers, and decentralized network architects.',
         category: 'tech',
         status: 'published',
+        isFeatured: true,
         venueId: 'a0000000-0000-0000-0000-000000000002',
         orgId: '22222222-2222-2222-2222-222222222221',
         startTime: '2026-10-25T09:00:00Z',
@@ -260,6 +276,7 @@ export async function seedDatabase() {
         desc: 'Neon visual projections, analog synthesizers, and retro-futuristic basslines taking over Jio World Garden.',
         category: 'music',
         status: 'published',
+        isFeatured: true,
         venueId: 'a0000000-0000-0000-0000-000000000005',
         orgId: '22222222-2222-2222-2222-222222222221',
         startTime: '2026-11-21T18:00:00Z',
@@ -352,6 +369,7 @@ export async function seedDatabase() {
         desc: 'Twelve hours of relentless warehouse industrial techno and modular synthesizer soundscapes in JLN Stadium.',
         category: 'music',
         status: 'published',
+        isFeatured: true,
         venueId: 'a0000000-0000-0000-0000-000000000007',
         orgId: '22222222-2222-2222-2222-222222222222',
         startTime: '2026-11-27T16:00:00Z',
@@ -442,8 +460,8 @@ export async function seedDatabase() {
 
     for (const ev of eventsData) {
       await client.query(
-        `INSERT INTO events (id, organizer_id, venue_id, title, slug, description, category, status, start_time, end_time, doors_open_time, banner_url)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);`,
+        `INSERT INTO events (id, organizer_id, venue_id, title, slug, description, category, status, start_time, end_time, doors_open_time, banner_url, is_featured)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);`,
         [
           ev.id,
           ev.orgId,
@@ -457,6 +475,7 @@ export async function seedDatabase() {
           ev.endTime,
           ev.doorsOpen,
           ev.banner,
+          Boolean((ev as { isFeatured?: boolean }).isFeatured),
         ],
       );
 

@@ -14,6 +14,7 @@ export interface BoxOfficeEvent {
   status: 'ON SALE' | 'FEW LEFT' | 'SOLD OUT';
   serialCode: string;
   isHeadliner?: boolean;
+  is_featured?: boolean;
   description?: string;
   tierSummary?: string;
 }
