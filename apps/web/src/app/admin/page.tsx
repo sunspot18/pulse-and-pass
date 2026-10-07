@@ -182,6 +182,13 @@ export default function AdminDashboardPage() {
               >
                 PUBLIC LINEUP →
               </Link>
+              <Link
+                href="/styleguide"
+                className="btn btn-ghost btn-sm btn-pill"
+                style={{ textDecoration: 'none', padding: '0.55rem 1.15rem' }}
+              >
+                DESIGN SYSTEM →
+              </Link>
             </div>
           </div>
 

@@ -17,8 +17,12 @@ export async function apiRequest<T = unknown>(
 
   const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
 
+  // Default 6s timeout if no custom signal provided
+  const signal = options.signal || (typeof AbortSignal !== 'undefined' && 'timeout' in AbortSignal ? AbortSignal.timeout(6000) : undefined);
+
   const res = await fetch(url, {
     ...options,
+    signal,
     headers,
     credentials: 'include',
   });

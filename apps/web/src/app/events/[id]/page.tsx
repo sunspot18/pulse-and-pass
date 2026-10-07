@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Navbar } from '../../../components/Navbar';
 import { Footer } from '../../../components/Footer';
 import { SEEDED_LINEUP } from '../../../data/seeded-events';
@@ -47,11 +47,46 @@ interface AttendeeFormInput {
   phone: string;
 }
 
-export default function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const unwrappedParams = use(params);
-  const eventId = unwrappedParams.id;
+export default function EventDetailPage({
+  params,
+}: {
+  params?: Promise<{ id: string }>;
+}) {
   const router = useRouter();
+  const routeParams = useParams();
   const { showToast } = useToast();
+
+  // Next.js 15 Dynamic Route Params extraction (synchronous useParams with promise fallback)
+  const routeId = routeParams?.id
+    ? (Array.isArray(routeParams.id) ? routeParams.id[0] : routeParams.id)
+    : '';
+
+  const [resolvedParamId, setResolvedParamId] = useState<string>(routeId || '');
+
+  useEffect(() => {
+    let active = true;
+    if (routeId) {
+      setResolvedParamId(routeId);
+      return;
+    }
+    if (params) {
+      if (typeof (params as any)?.then === 'function') {
+        params
+          .then((p) => {
+            if (active && p?.id) setResolvedParamId(p.id);
+          })
+          .catch(() => {});
+      } else {
+        const syncId = (params as unknown as { id?: string })?.id;
+        if (active && syncId) setResolvedParamId(syncId);
+      }
+    }
+    return () => {
+      active = false;
+    };
+  }, [params, routeId]);
+
+  const eventId = routeId || resolvedParamId;
 
   const [event, setEvent] = useState<EventDetailData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -104,17 +139,86 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     let isMounted = true;
     async function fetchEvent() {
       setIsLoading(true);
+
+      const targetId = eventId || 'e0000001-0000-0000-0000-000000000001';
+
       try {
-        const res = await apiRequest<{ event: EventDetailData }>(`/events/${eventId}`);
-        if (isMounted && res.event) {
-          setEvent(res.event);
-          if (res.event.tiers && res.event.tiers.length > 0 && res.event.tiers[0]) {
-            setSelectedTierId(res.event.tiers[0].id);
+        const res = await apiRequest<any>(`/events/${targetId}`);
+        const rawEvent =
+          res && typeof res === 'object'
+            ? res.event || res.data || (res.id && res.title ? res : null)
+            : null;
+
+        if (isMounted && rawEvent && rawEvent.id) {
+          // Ensure tiers are present and populated with availability
+          const rawTiers = Array.isArray(rawEvent.tiers) ? rawEvent.tiers : [];
+          const tiers: TicketTierData[] =
+            rawTiers.length > 0
+              ? rawTiers.map((t: any) => ({
+                  id: String(t.id),
+                  name: String(t.name || 'General Admission'),
+                  description: t.description || undefined,
+                  price_paise: Number(t.price_paise) || 99900,
+                  capacity: Number(t.capacity) || 500,
+                  sold: Number(t.sold) || 0,
+                  available: Number(t.available ?? (Number(t.capacity) - Number(t.sold))) || 500,
+                }))
+              : [
+                  {
+                    id: 'tier-ga',
+                    name: 'General Admission',
+                    description: 'Full standing floor entry and main stage access.',
+                    price_paise: Number(rawEvent.min_price_paise) || 99900,
+                    capacity: 500,
+                    sold: 120,
+                    available: 380,
+                  },
+                  {
+                    id: 'tier-vip',
+                    name: 'VIP All-Access Pass',
+                    description: 'Express turnstile lane and elevated viewing lounge.',
+                    price_paise: (Number(rawEvent.min_price_paise) || 99900) + 150000,
+                    capacity: 100,
+                    sold: 45,
+                    available: 55,
+                  },
+                ];
+
+          const fullEvent: EventDetailData = {
+            id: rawEvent.id,
+            title: rawEvent.title,
+            description: rawEvent.description || 'Curated box-office experience.',
+            category: rawEvent.category || 'General',
+            start_time: rawEvent.start_time || new Date().toISOString(),
+            end_time: rawEvent.end_time || new Date(Date.now() + 3600000 * 4).toISOString(),
+            doors_open_time: rawEvent.doors_open_time,
+            age_restriction: rawEvent.age_restriction,
+            banner_url: rawEvent.banner_url,
+            venue: rawEvent.venue || {
+              id: 'v1',
+              name: 'Main Arena',
+              address: 'City Center',
+              city: 'Hyderabad',
+              capacity: 10000,
+            },
+            tiers,
+          };
+
+          setEvent(fullEvent);
+          if (fullEvent.tiers[0]) {
+            setSelectedTierId(fullEvent.tiers[0].id);
           }
+          return;
         }
+
+        throw new Error('Event manifest empty');
       } catch {
         // Fallback to seeded lineup fixture if backend event not found or offline
-        const seededMatch = SEEDED_LINEUP.find((e) => e.id === eventId) || SEEDED_LINEUP[0];
+        const seededMatch =
+          SEEDED_LINEUP.find((e) => e.id === targetId) ||
+          SEEDED_LINEUP.find((e) => e.slug === targetId) ||
+          SEEDED_LINEUP[0];
+
         if (isMounted && seededMatch) {
           const fallbackDetail: EventDetailData = {
             id: seededMatch.id,
@@ -155,6 +259,16 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
                 sold: 45,
                 available: 55,
               },
+              {
+                id: 't-pit',
+                name: 'Fan Pit Pass',
+                description:
+                  'Direct front-of-stage standing area with priority gate clearance.',
+                price_paise: (seededMatch.minPrice + 3000) * 100,
+                capacity: 50,
+                sold: 20,
+                available: 30,
+              },
             ],
           };
           setEvent(fallbackDetail);
@@ -163,7 +277,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
           }
         }
       } finally {
-        if (isMounted) setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 

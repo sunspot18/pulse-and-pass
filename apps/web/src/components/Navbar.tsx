@@ -71,7 +71,6 @@ export function Navbar() {
       ? [{ label: 'Organizer Console', href: '/organizer' }]
       : []),
     ...(currentUser?.role === 'admin' ? [{ label: 'Admin System', href: '/admin' }] : []),
-    { label: 'Design System', href: '/styleguide' },
   ];
 
   return (
